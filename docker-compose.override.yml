@@ -1,0 +1,5 @@
+# docker-compose bu dosyayı otomatik birleştirir.
+# Postgres yalnızca Docker içi ağda kalsın; host'ta 5432 yayınlanmasın (çakışmayı önler).
+services:
+  db:
+    ports: []
