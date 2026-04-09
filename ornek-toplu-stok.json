@@ -1,0 +1,6 @@
+{
+  "items": [
+    { "name": "Örnek ürün 1", "code": "ORN-001", "unit": "adet" },
+    { "name": "Örnek ürün 2", "code": "ORN-002", "unit": "kilogram" }
+  ]
+}

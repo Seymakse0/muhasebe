@@ -1,0 +1,8 @@
+{
+  "name": "muhasebe",
+  "private": true,
+  "scripts": {
+    "postinstall": "npm install --prefix backend",
+    "import:xls": "node backend/scripts/import-xls.mjs"
+  }
+}

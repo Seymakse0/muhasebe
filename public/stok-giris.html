@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stok girişi</title>
+  <link rel="stylesheet" href="voyage-design-system.css" />
+</head>
+<body>
+  <aside id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">V</div>
+      <div>
+        <div class="brand-name">VOYAGE <span>HOTELS</span></div>
+        <div class="brand-sub">Stok tanımı</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="index.html">
+        <span class="nav-icon">▣</span>
+        Stok sayımı
+      </a>
+      <a class="nav-item active" href="stok-giris.html">
+        <span class="nav-icon">＋</span>
+        Stok girişi
+      </a>
+      <a class="nav-item" href="yonetim.html" id="navYonetim" style="display:none;">
+        <span class="nav-icon">⚙</span>
+        Yönetim
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="navAvatar">?</div>
+        <div>
+          <div class="user-role" id="navUserName">—</div>
+          <div style="font-size:11px; color:var(--text-dim);" id="navUserRole">—</div>
+        </div>
+      </div>
+      <button type="button" class="btn-signout mt-12" id="btnLogout">Çıkış</button>
+    </div>
+  </aside>
+
+  <main id="main">
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">Stok girişi</h1>
+        <p class="page-sub">Yeni stok adı, kodu ve birimi kaydedilir; sayım ekranındaki aramada görünür.</p>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="card mb-24" style="max-width:640px;">
+        <div class="card-title">Excel’den toplu yükle</div>
+        <p class="mb-16" style="font-size:13px; color:var(--text-dim); line-height:1.5;">
+          <strong>YİYECEK ENVANTER STOK LİSTESİ</strong> gibi .xls / .xlsx dosyası seçin. İlk sayfada başlık satırında
+          <em>stok adı</em>, <em>stok kodu</em> ve <em>birim</em> sütunları olmalıdır (birim: KG → kilogram, AD → adet).
+          Mevcut kodlar güncellenir.
+        </p>
+        <div class="form-group mb-16">
+          <label class="form-label" for="xlsFile">Dosya</label>
+          <input type="file" id="xlsFile" accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+        </div>
+        <button type="button" class="btn btn-primary" id="uploadXlsBtn" disabled>Veritabanına aktar</button>
+        <p id="xlsUploadResult" class="mt-16" style="font-size:13px; color:var(--text-dim); white-space:pre-wrap;"></p>
+      </div>
+
+      <div class="card" style="max-width:560px;">
+        <div class="card-title">Tek stok ekle</div>
+        <form id="stockForm">
+          <div class="form-group mb-16">
+            <label class="form-label" for="newName">Stok adı</label>
+            <input type="text" class="form-input" id="newName" required maxlength="512" />
+          </div>
+          <div class="form-group mb-16">
+            <label class="form-label" for="newCode">Stok kodu</label>
+            <input type="text" class="form-input" id="newCode" required maxlength="128" />
+          </div>
+          <div class="form-group mb-16">
+            <label class="form-label" for="newUnit">Birim</label>
+            <select class="form-select" id="newUnit" required>
+              <option value="">Seçin</option>
+              <option value="kilogram">kilogram</option>
+              <option value="adet">adet</option>
+            </select>
+          </div>
+          <div class="form-actions" style="margin-top:0;">
+            <button type="submit" class="btn btn-primary" id="saveStockBtn">Kaydet</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toastRoot"></div>
+
+  <script type="module" src="stok-giris-app.js"></script>
+</body>
+</html>

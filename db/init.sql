@@ -1,0 +1,41 @@
+-- Stok sayımı — şema ve maliyet merkezleri
+CREATE TABLE IF NOT EXISTS cost_centers (
+  id   SERIAL PRIMARY KEY,
+  code VARCHAR(64) UNIQUE NOT NULL,
+  name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS stock_items (
+  id         SERIAL PRIMARY KEY,
+  name       VARCHAR(512) NOT NULL,
+  code       VARCHAR(128) NOT NULL UNIQUE,
+  unit       VARCHAR(32) NOT NULL CHECK (unit IN ('kilogram', 'adet')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_stock_items_name_lower ON stock_items (LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_stock_items_code ON stock_items (code);
+
+CREATE TABLE IF NOT EXISTS stock_counts (
+  id              SERIAL PRIMARY KEY,
+  cost_center_id  INTEGER NOT NULL REFERENCES cost_centers(id) ON DELETE CASCADE,
+  stock_item_id   INTEGER NOT NULL REFERENCES stock_items(id) ON DELETE CASCADE,
+  quantity        NUMERIC(18, 4) NOT NULL CHECK (quantity >= 0),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (cost_center_id, stock_item_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_stock_counts_center ON stock_counts(cost_center_id);
+
+INSERT INTO cost_centers (code, name) VALUES
+  ('ANA_AMBAR_SORGUN', 'ANA AMBAR SORGUN'),
+  ('ANA_MUTFAK_SORGUN', 'ANA MUTFAK SORGUN'),
+  ('AZURE_MUTFAK_SORGUN', 'AZURE MUTFAK SORGUN'),
+  ('CIN_MUTFAK_SORGUN', 'CIN MUTFAK SORGUN'),
+  ('KEBABISTAN_MUTFAK_SORGUN', 'KEBABISTAN MUTFAK SORGUN'),
+  ('PASTANE_MUTFAK_SORGUN', 'PASTANE MUTFAK SORGUN'),
+  ('PERSONEL_MUTFAK_SORGUN', 'PERSONEL MUTFAK SORGUN'),
+  ('RUM_MUTFAK_SORGUN', 'RUM MUTFAK SORGUN'),
+  ('SNACK_MUTFAK_SORGUN', 'SNACK MUTFAK SORGUN'),
+  ('STEAKHOUSE_SORGUN', 'STEAKHOUSE SORGUN')
+ON CONFLICT (code) DO NOTHING;

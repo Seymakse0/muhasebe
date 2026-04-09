@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stok Sayımı</title>
+  <link rel="stylesheet" href="voyage-design-system.css" />
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <aside id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">V</div>
+      <div>
+        <div class="brand-name">VOYAGE <span>HOTELS</span></div>
+        <div class="brand-sub">Stok sayımı</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" href="index.html">
+        <span class="nav-icon">▣</span>
+        Stok sayımı
+      </a>
+      <a class="nav-item" href="stok-giris.html">
+        <span class="nav-icon">＋</span>
+        Stok girişi
+      </a>
+      <a class="nav-item" href="yonetim.html" id="navYonetim" style="display:none;">
+        <span class="nav-icon">⚙</span>
+        Yönetim
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="navAvatar">?</div>
+        <div>
+          <div class="user-role" id="navUserName">—</div>
+          <div style="font-size:11px; color:var(--text-dim);" id="navUserRole">—</div>
+        </div>
+      </div>
+      <button type="button" class="btn-signout mt-12" id="btnLogout">Çıkış</button>
+    </div>
+  </aside>
+
+  <main id="main">
+    <header class="page-header">
+      <div>
+        <div class="page-header-actions mb-12" style="justify-content:flex-start;">
+          <button type="button" class="btn btn-secondary" id="openCostCenterBtn">
+            Maliyet merkezi seç
+          </button>
+          <span class="badge badge-gold" id="selectedCostCenterBadge" style="display:none;"></span>
+        </div>
+        <h1 class="page-title">Stok sayımı</h1>
+        <p class="page-sub" id="pageSub">Önce maliyet merkezi seçin; ardından stok arayıp miktar girin.</p>
+      </div>
+      <div class="page-header-actions">
+        <button type="button" class="btn btn-primary" id="excelExportBtn" disabled>
+          Excel’e aktar
+        </button>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="card mb-24">
+        <div class="card-title">Yeni satır</div>
+        <div class="grid-4">
+          <div class="form-group stok-search-wrap">
+            <label class="form-label" for="stockSearch">Stok adı (arat: % veya kısmi metin)</label>
+            <input type="text" class="form-input" id="stockSearch" autocomplete="off" placeholder="Örn: %peynir% veya peynir" />
+            <div class="stok-suggest-panel" id="stockSuggest" role="listbox"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Stok kodu</label>
+            <input type="text" class="form-input" id="stockCode" readonly />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Birim</label>
+            <input type="text" class="form-input" id="stockUnit" readonly />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Stok miktarı</label>
+            <input type="text" class="form-input qty-input" id="stockQty" inputmode="decimal" placeholder="Sadece rakam ve virgül" />
+          </div>
+        </div>
+        <input type="hidden" id="selectedStockId" />
+        <div class="form-actions" style="justify-content:flex-start; margin-top:16px;">
+          <button type="button" class="btn btn-primary" id="addRowBtn" disabled>Satırı ekle / güncelle</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>Sayım listesi</span>
+          <span class="badge badge-gray" id="rowCountBadge">0 satır</span>
+        </div>
+        <div class="table-wrap">
+          <table id="exportTable">
+            <thead>
+              <tr>
+                <th colspan="5" id="exportHeaderMeta" style="font-size:13px; text-transform:none; letter-spacing:normal;">Maliyet merkezi seçilmedi</th>
+              </tr>
+              <tr>
+                <th>Stok adı</th>
+                <th>Stok kodu</th>
+                <th>Birim</th>
+                <th>Stok miktarı</th>
+                <th style="width:100px;"></th>
+              </tr>
+            </thead>
+            <tbody id="countTableBody">
+              <tr>
+                <td colspan="5" style="color:var(--text-dim);">Maliyet merkezi seçin.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="costCenterModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ccModalTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="ccModalTitle">Maliyet merkezi</h2>
+        <button type="button" class="modal-close" id="closeCostCenterModal" aria-label="Kapat">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-16" style="color:var(--text-dim); font-size:13px;">Sayım yapılacak bölümü seçin. Seçim değişince liste bu merkeze göre yenilenir.</p>
+        <div class="cost-center-list" id="costCenterList"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelCostCenterModal">Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastRoot"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

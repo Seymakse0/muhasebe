@@ -1,0 +1,21 @@
+{
+  "name": "stok-sayim-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "import:xls": "node scripts/import-xls.mjs",
+    "reset-admin": "node scripts/reset-admin-password.mjs"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "express-session": "^1.18.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "multer": "^2.0.2",
+    "pg": "^8.13.1",
+    "xlsx": "^0.18.5"
+  }
+}

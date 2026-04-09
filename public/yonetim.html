@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yönetim — Kullanıcılar</title>
+  <link rel="stylesheet" href="voyage-design-system.css" />
+</head>
+<body>
+  <aside id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">V</div>
+      <div>
+        <div class="brand-name">VOYAGE <span>HOTELS</span></div>
+        <div class="brand-sub">Yönetim</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="index.html">
+        <span class="nav-icon">▣</span>
+        Stok sayımı
+      </a>
+      <a class="nav-item" href="stok-giris.html">
+        <span class="nav-icon">＋</span>
+        Stok girişi
+      </a>
+      <a class="nav-item active" href="yonetim.html" id="navYonetim" style="display:none;">
+        <span class="nav-icon">⚙</span>
+        Yönetim
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="navAvatar">?</div>
+        <div>
+          <div class="user-role" id="navUserName">—</div>
+          <div style="font-size:11px; color:var(--text-dim);" id="navUserRole">—</div>
+        </div>
+      </div>
+      <button type="button" class="btn-signout mt-12" id="btnLogout">Çıkış</button>
+    </div>
+  </aside>
+
+  <main id="main">
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">Kullanıcı yönetimi</h1>
+        <p class="page-sub">Kullanıcı ekleyin veya silin. Yönetici işaretli kullanıcılar bu ekrana erişir.</p>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="card mb-24" style="max-width:520px;">
+        <div class="card-title">Yeni kullanıcı</div>
+        <form id="userForm" class="grid-2">
+          <div class="form-group">
+            <label class="form-label" for="newUsername">Kullanıcı adı</label>
+            <input type="text" class="form-input" id="newUsername" required maxlength="128" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="newPassword">Şifre</label>
+            <input type="password" class="form-input" id="newPassword" required minlength="4" autocomplete="new-password" />
+          </div>
+          <div class="form-group" style="grid-column:1/-1;">
+            <label class="form-check">
+              <input type="checkbox" id="newIsAdmin" />
+              Yönetici (kullanıcı yönetimi + tüm sayfalar)
+            </label>
+          </div>
+          <div class="form-actions" style="grid-column:1/-1; margin-top:0;">
+            <button type="submit" class="btn btn-primary">Kullanıcı ekle</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Kayıtlı kullanıcılar</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Kullanıcı adı</th>
+                <th>Rol</th>
+                <th>Kayıt</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              <tr><td colspan="4" class="loading"><span class="spinner"></span> Yükleniyor</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toastRoot"></div>
+
+  <script type="module" src="yonetim-app.js"></script>
+</body>
+</html>
