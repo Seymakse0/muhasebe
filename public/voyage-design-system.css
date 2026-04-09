@@ -553,6 +553,11 @@ body.no-sidebar #main { margin-left: 0; }
 
 .stok-search-wrap { position: relative; }
 
+.count-qty-cell {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .cost-center-list {
   display: flex;
   flex-direction: column;

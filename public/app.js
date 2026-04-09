@@ -125,7 +125,7 @@ async function selectCostCenter(id) {
 
   els.selectedCostCenterBadge.style.display = 'inline-flex';
   els.selectedCostCenterBadge.textContent = selectedCostCenter.name;
-  els.pageSub.textContent = `Seçili maliyet merkezi: ${selectedCostCenter.name}`;
+  els.pageSub.textContent = `Seçili maliyet merkezi: ${selectedCostCenter.name}. Miktarı yalnızca «Yeni satır»dan girin; aynı stok tekrar eklenince sayım miktarı otomatik toplanır.`;
   els.excelExportBtn.disabled = false;
 
   resetNewRowForm();
@@ -167,38 +167,11 @@ function renderTable() {
         <td>${escapeHtml(row.stock_name)}</td>
         <td>${escapeHtml(row.stock_code)}</td>
         <td>${escapeHtml(unitLabel(row.unit))}</td>
-        <td><input type="text" class="form-input qty-input row-qty" data-id="${row.id}" value="${escapeHtml(q)}" /></td>
+        <td class="count-qty-cell" title="Miktar yalnızca üstteki «Yeni satır»dan eklenir; aynı stok tekrar eklenince toplanır.">${escapeHtml(q)}</td>
         <td><button type="button" class="btn btn-sm btn-danger row-del" data-id="${row.id}">Sil</button></td>
       </tr>`;
     })
     .join('');
-
-  els.countTableBody.querySelectorAll('.row-qty').forEach((inp) => {
-    inp.addEventListener('input', (e) => {
-      e.target.value = sanitizeQty(e.target.value);
-    });
-    inp.addEventListener('change', async () => {
-      const id = Number(inp.dataset.id);
-      const q = qtyToApi(inp.value);
-      if (q === '' || Number.isNaN(Number(q))) {
-        toast('Geçerli miktar girin', 'error');
-        await loadCounts();
-        return;
-      }
-      const r = await api(`/api/stock-counts/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ quantity: q }),
-      });
-      if (!r.ok) {
-        const err = await r.json().catch(() => ({}));
-        toast(err.error || 'Güncellenemedi', 'error');
-        await loadCounts();
-        return;
-      }
-      toast('Miktar güncellendi', 'success');
-      await loadCounts();
-    });
-  });
 
   els.countTableBody.querySelectorAll('.row-del').forEach((btn) => {
     btn.addEventListener('click', async () => {
