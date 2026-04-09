@@ -91,8 +91,13 @@
 
       <div class="card">
         <div class="card-title">
-          <span>Sayım listesi</span>
-          <span class="badge badge-gray" id="rowCountBadge">0 satır</span>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <span>Sayım listesi</span>
+            <span class="badge badge-gray" id="rowCountBadge">0 satır</span>
+          </div>
+          <button type="button" class="btn btn-sm btn-danger" id="deleteAllCountsBtn" disabled title="Yalnızca seçili maliyet merkezindeki tüm satırları siler">
+            Hepsini sil
+          </button>
         </div>
         <div class="table-wrap">
           <table id="exportTable">

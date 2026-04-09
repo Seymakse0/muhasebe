@@ -381,6 +381,16 @@ app.patch('/api/stock-counts/:id', async (req, res) => {
   res.json(rows[0]);
 });
 
+/** Seçili maliyet merkezindeki tüm sayım satırlarını siler (tek tek silmeye alternatif). */
+app.delete('/api/stock-counts', async (req, res) => {
+  const ccId = Number(req.query.cost_center_id);
+  if (!ccId) {
+    return res.status(400).json({ error: 'cost_center_id gerekli.' });
+  }
+  const r = await pool.query('DELETE FROM stock_counts WHERE cost_center_id = $1', [ccId]);
+  res.json({ ok: true, deleted: r.rowCount });
+});
+
 app.delete('/api/stock-counts/:id', async (req, res) => {
   const id = Number(req.params.id);
   const r = await pool.query('DELETE FROM stock_counts WHERE id = $1', [id]);

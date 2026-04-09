@@ -70,6 +70,7 @@ const els = {
   countTableBody: document.getElementById('countTableBody'),
   exportHeaderMeta: document.getElementById('exportHeaderMeta'),
   rowCountBadge: document.getElementById('rowCountBadge'),
+  deleteAllCountsBtn: document.getElementById('deleteAllCountsBtn'),
 };
 
 function openModal() {
@@ -149,16 +150,20 @@ function renderTable() {
   els.rowCountBadge.textContent = `${counts.length} satır`;
 
   if (!selectedCostCenter) {
+    els.deleteAllCountsBtn.disabled = true;
     els.countTableBody.innerHTML =
       '<tr><td colspan="5" style="color:var(--text-dim);">Maliyet merkezi seçin.</td></tr>';
     return;
   }
 
   if (counts.length === 0) {
+    els.deleteAllCountsBtn.disabled = true;
     els.countTableBody.innerHTML =
       '<tr><td colspan="5" style="color:var(--text-dim);">Bu merkez için henüz satır yok.</td></tr>';
     return;
   }
+
+  els.deleteAllCountsBtn.disabled = false;
 
   els.countTableBody.innerHTML = counts
     .map((row) => {
@@ -299,6 +304,28 @@ els.closeCostCenterModal.addEventListener('click', closeModal);
 els.cancelCostCenterModal.addEventListener('click', closeModal);
 els.costCenterModal.addEventListener('click', (e) => {
   if (e.target === els.costCenterModal) closeModal();
+});
+
+els.deleteAllCountsBtn.addEventListener('click', async () => {
+  if (!selectedCostCenter || counts.length === 0) return;
+  const name = selectedCostCenter.name;
+  if (
+    !confirm(
+      `«${name}» maliyet merkezindeki ${counts.length} sayım satırının tamamı silinsin mi? Bu işlem geri alınamaz.`
+    )
+  ) {
+    return;
+  }
+  const r = await api(`/api/stock-counts?cost_center_id=${selectedCostCenter.id}`, { method: 'DELETE' });
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({}));
+    toast(err.error || 'Silinemedi', 'error');
+    return;
+  }
+  const data = await r.json().catch(() => ({}));
+  const n = typeof data.deleted === 'number' ? data.deleted : counts.length;
+  toast(n > 0 ? `Tüm sayım satırları silindi (${n})` : 'Silinecek satır yoktu', 'success');
+  await loadCounts();
 });
 
 els.excelExportBtn.addEventListener('click', () => {
