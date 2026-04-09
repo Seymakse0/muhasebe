@@ -83,9 +83,7 @@ function closeModal() {
 }
 
 function unitLabel(u) {
-  if (u === 'kilogram') return 'kilogram';
-  if (u === 'adet') return 'adet';
-  return u || '';
+  return u == null || u === '' ? '' : String(u);
 }
 
 async function loadCostCenters() {

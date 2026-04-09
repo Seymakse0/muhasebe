@@ -1,6 +1,6 @@
 import XLSX from 'xlsx';
 
-/** Türkçe birim → kilogram | adet */
+/** Türkçe birim metninin kilogram veya adet ailesine uyup uymadığını kontrol eder (Excel tam metni saklanır). */
 export function normalizeUnit(raw) {
   if (raw == null || raw === '') return null;
   let s = String(raw).trim().toLocaleLowerCase('tr-TR');
@@ -8,7 +8,12 @@ export function normalizeUnit(raw) {
   if (/^(kg|kgs|kilogram|kilo|kğ)$/.test(s)) return 'kilogram';
   if (s === 'g' || s === 'gr' || s === 'gram') return 'kilogram';
   if (/^(ad|adet|adt|tane|pcs|pk|piece)$/.test(s)) return 'adet';
-  if (/kilo|kilogram/.test(s) && !/adet|tane/.test(s)) return 'kilogram';
+  if (
+    (/kilo|kilogram/.test(s) || /kg/.test(s) || /\d+[,.]?\d*gr$/.test(s)) &&
+    !/adet|tane/.test(s)
+  ) {
+    return 'kilogram';
+  }
   if (/adet|tane/.test(s)) return 'adet';
   return null;
 }
@@ -90,17 +95,16 @@ export function parseStockRowsFromBuffer(buffer) {
     const name = String(row[nameI] ?? '').trim();
     const code = String(row[codeI] ?? '').trim();
     const unitRaw = String(row[unitI] ?? '').trim();
-    const unit = normalizeUnit(unitRaw);
     if (!name && !code) continue;
     if (!name || !code) {
       skipped.push({ row: r + 1, reason: 'Eksik stok adı veya kod' });
       continue;
     }
-    if (!unit) {
+    if (!normalizeUnit(unitRaw)) {
       skipped.push({ row: r + 1, reason: `Bilinmeyen birim: "${unitRaw || '(boş)'}"` });
       continue;
     }
-    items.push({ name, code, unit });
+    items.push({ name, code, unit: unitRaw });
   }
   return { items, skipped, sheetName };
 }

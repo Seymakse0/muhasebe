@@ -12,7 +12,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { pool } from '../db.js';
-import { parseStockRowsFromBuffer } from '../stockXlsImport.js';
+import { parseStockRowsFromBuffer, normalizeUnit } from '../stockXlsImport.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -21,8 +21,8 @@ async function upsertStockItems(client, items) {
   for (const it of items) {
     const name = String(it?.name ?? '').trim();
     const code = String(it?.code ?? '').trim();
-    const u = String(it?.unit ?? '').toLowerCase();
-    if (!name || !code || (u !== 'kilogram' && u !== 'adet')) continue;
+    const u = String(it?.unit ?? '').trim();
+    if (!name || !code || !normalizeUnit(u)) continue;
     await client.query(
       `INSERT INTO stock_items (name, code, unit) VALUES ($1, $2, $3)
        ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, unit = EXCLUDED.unit`,

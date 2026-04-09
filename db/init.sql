@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS stock_items (
   id         SERIAL PRIMARY KEY,
   name       VARCHAR(512) NOT NULL,
   code       VARCHAR(128) NOT NULL UNIQUE,
-  unit       VARCHAR(32) NOT NULL CHECK (unit IN ('kilogram', 'adet')),
+  unit       VARCHAR(128) NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

@@ -2,8 +2,22 @@
 2) cp deploy/env.example .env   (veya: cp .env.example .env)
    SESSION_SECRET, POSTGRES_PASSWORD, ADMIN_PASSWORD güçlü yapın
 3) Üretim HTTPS: .env içinde COOKIE_SECURE=true
-4) .env içinde APP_PORT=3006 (veya boş host portu)
-5) docker compose up -d --build
-6) Nginx: deploy/nginx-accounting.voyagestars.com.conf.example dosyasını /etc/nginx/sites-available/ altına alın,
-   proxy_pass portunu APP_PORT ile aynı yapın, sites-enabled'a symlink, nginx -t, reload nginx
-7) Cloudflare: DNS A kaydı + SSL Full veya Full (strict)
+4) docker-compose.yml uygulamayı host'ta 3006'da yayınlar
+5) Hâlâ "3000 address already in use" ise (git güncel değilse):
+   python3 deploy/fix-app-port-3006.py
+6) docker compose up -d --build
+7) Nginx: proxy_pass http://127.0.0.1:3006 (örnek dosyadaki gibi)
+8) Cloudflare: DNS A kaydı + SSL Full veya Full (strict)
+
+--- Kod güncellemesini sitede görmek (Docker) ---
+Proje kök klasöründe (docker-compose.yml'in olduğu yer):
+  git pull
+  docker compose up -d --build
+
+--build şart: public/ ve backend/ konteyner imajına kopyalanır; sadece restart yetmez.
+
+Yeni bir db/migration-*.sql eklendiyse (ilk kez): veritabanında bir kez çalıştırın, örnek:
+  docker compose exec -T db psql -U muhasebe -d muhasebe < db/migration-002-unit-free-text.sql
+(Git Bash veya WSL'de; PowerShell'de: Get-Content db\migration-002-unit-free-text.sql | docker compose exec -T db psql -U muhasebe -d muhasebe)
+
+Tarayıcıda eski sayfa kalırsa: Ctrl+F5 veya gizli pencerede deneyin.
