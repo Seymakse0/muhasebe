@@ -107,6 +107,17 @@ function escapeHtml(s) {
   return d.innerHTML;
 }
 
+function resetNewRowForm() {
+  els.stockSearch.value = '';
+  els.stockCode.value = '';
+  els.stockUnit.value = '';
+  els.stockQty.value = '';
+  els.selectedStockId.value = '';
+  els.addRowBtn.disabled = true;
+  els.stockSuggest.classList.remove('open');
+  suggestOpen = false;
+}
+
 async function selectCostCenter(id) {
   selectedCostCenter = costCenters.find((c) => c.id === id) || null;
   closeModal();
@@ -117,11 +128,7 @@ async function selectCostCenter(id) {
   els.pageSub.textContent = `Seçili maliyet merkezi: ${selectedCostCenter.name}`;
   els.excelExportBtn.disabled = false;
 
-  document.getElementById('stockSearch').value = '';
-  document.getElementById('stockCode').value = '';
-  document.getElementById('stockUnit').value = '';
-  document.getElementById('stockQty').value = '';
-  document.getElementById('selectedStockId').value = '';
+  resetNewRowForm();
 
   await loadCounts();
 }
@@ -310,7 +317,7 @@ els.addRowBtn.addEventListener('click', async () => {
     return;
   }
   toast('Kaydedildi', 'success');
-  els.stockQty.value = '';
+  resetNewRowForm();
   await loadCounts();
 });
 
