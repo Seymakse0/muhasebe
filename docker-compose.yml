@@ -17,8 +17,9 @@ services:
 
   app:
     build: .
+    # Host 3006 → konteyner 3000 (sunucuda 3000 dolu; .env APP_PORT kullanılmaz — sabit)
     ports:
-      - "3000:3000"
+      - "3006:3000"
     environment:
       PGHOST: db
       PGPORT: 5432
