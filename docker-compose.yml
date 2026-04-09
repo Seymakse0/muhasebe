@@ -3,13 +3,12 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: muhasebe
-      POSTGRES_PASSWORD: muhasebe
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-muhasebe}
       POSTGRES_DB: muhasebe
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/01-init.sql
-    ports:
-      - "5432:5432"
+    # Postgres yalnızca Docker ağından erişilir; host'a 5432 yayınlanmaz (port çakışması olmaz)
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U muhasebe -d muhasebe"]
       interval: 5s
@@ -25,12 +24,11 @@ services:
       PGPORT: 5432
       PGDATABASE: muhasebe
       PGUSER: muhasebe
-      PGPASSWORD: muhasebe
-      # http://localhost için çerez Secure olmamalı
-      COOKIE_SECURE: "false"
-      SESSION_SECRET: "${SESSION_SECRET:-muhasebe-uretimde-degistirin}"
-      # Boş bırakılırsa authSetup varsayılan admin123 kullanır; sorun olursa: npm run reset-admin
-      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-admin123}"
+      PGPASSWORD: ${POSTGRES_PASSWORD:-muhasebe}
+      # .env: COOKIE_SECURE=true (HTTPS üretim), false (yerel HTTP)
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      SESSION_SECRET: ${SESSION_SECRET:-muhasebe-uretimde-degistirin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
     depends_on:
       db:
         condition: service_healthy
