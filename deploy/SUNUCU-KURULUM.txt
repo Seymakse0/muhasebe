@@ -1,0 +1,9 @@
+1) Proje: git clone / git pull
+2) cp deploy/env.example .env   (veya: cp .env.example .env)
+   SESSION_SECRET, POSTGRES_PASSWORD, ADMIN_PASSWORD güçlü yapın
+3) Üretim HTTPS: .env içinde COOKIE_SECURE=true
+4) .env içinde APP_PORT=3006 (veya boş host portu)
+5) docker compose up -d --build
+6) Nginx: deploy/nginx-accounting.voyagestars.com.conf.example dosyasını /etc/nginx/sites-available/ altına alın,
+   proxy_pass portunu APP_PORT ile aynı yapın, sites-enabled'a symlink, nginx -t, reload nginx
+7) Cloudflare: DNS A kaydı + SSL Full veya Full (strict)
