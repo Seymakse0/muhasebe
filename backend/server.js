@@ -354,7 +354,7 @@ app.post('/api/stock-counts', async (req, res) => {
     `INSERT INTO stock_counts (cost_center_id, stock_item_id, quantity)
      VALUES ($1, $2, $3)
      ON CONFLICT (cost_center_id, stock_item_id)
-     DO UPDATE SET quantity = EXCLUDED.quantity, updated_at = NOW()
+     DO UPDATE SET quantity = stock_counts.quantity + EXCLUDED.quantity, updated_at = NOW()
      RETURNING id, cost_center_id, stock_item_id, quantity, updated_at`,
     [cc, si, qNum]
   );
