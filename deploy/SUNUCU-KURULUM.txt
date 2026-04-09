@@ -12,12 +12,23 @@
 --- Kod güncellemesini sitede görmek (Docker) ---
 Proje kök klasöründe (docker-compose.yml'in olduğu yer):
   git pull
-  docker compose up -d --build
+  docker compose build --no-cache app
+  docker compose up -d
 
 --build şart: public/ ve backend/ konteyner imajına kopyalanır; sadece restart yetmez.
 
-Yeni bir db/migration-*.sql eklendiyse (ilk kez): veritabanında bir kez çalıştırın, örnek:
+git pull hata verirse: "docker-compose.yml would be overwritten"
+  Sunucuda docker-compose.yml elle değiştirilmiş demektir. Geçici saklayıp çekin:
+    cd ~/muhasebe
+    git stash push -m "sunucu docker-compose" -- docker-compose.yml
+    git pull
+    git stash pop
+  (Çakışma çıkarsa dosyayı birleştirip kaydedin; sonra build/up.)
+
+Birim metni (Excel tam metin) için — ilk kez veritabanında:
   docker compose exec -T db psql -U muhasebe -d muhasebe < db/migration-002-unit-free-text.sql
-(Git Bash veya WSL'de; PowerShell'de: Get-Content db\migration-002-unit-free-text.sql | docker compose exec -T db psql -U muhasebe -d muhasebe)
+(Git Bash/WSL; PowerShell: Get-Content db\migration-002-unit-free-text.sql -Raw | docker compose exec -T db psql -U muhasebe -d muhasebe)
+
+Eski stok satırlarında hâlâ "adet"/"kilogram" görünürse: Stok girişi sayfasından Excel'i tekrar yükleyin (aynı kodlar güncellenir).
 
 Tarayıcıda eski sayfa kalırsa: Ctrl+F5 veya gizli pencerede deneyin.
