@@ -48,12 +48,24 @@ app.use(
   })
 );
 
+/** Nginx 502 önleme: dinleyici hemen açılır; DB hazır olana kadar /api (canlılık/health hariç) 503 döner. */
+let dbReady = false;
+app.use((req, res, next) => {
+  if (req.path === '/api/live' && req.method === 'GET') return next();
+  if (req.path === '/api/health' && req.method === 'GET') return next();
+  if (req.path.startsWith('/api/') && !dbReady) {
+    return res.status(503).json({ error: 'Veritabanı hazırlanıyor' });
+  }
+  next();
+});
+
 function isPublicRoute(req) {
   // Modül script / stil istekleri HTML yönlendirmesine düşmesin (MIME: text/html hatası)
   if (req.method === 'GET' && /\.(js|css|map)$/i.test(req.path)) return true;
   if (req.path === '/login.html') return true;
   if (req.path === '/voyage-design-system.css') return true;
   if (req.path === '/favicon.ico') return true;
+  if (req.path === '/api/live' && req.method === 'GET') return true;
   if (req.path === '/api/health' && req.method === 'GET') return true;
   if (req.path === '/api/auth/login' && req.method === 'POST') return true;
   return false;
@@ -106,6 +118,11 @@ function buildSearchPattern(q) {
   if (s.includes('%')) return s;
   return `%${s}%`;
 }
+
+/** Docker / nginx: yalnızca süreç dinliyor mu (DB beklemeden 200). */
+app.get('/api/live', (_req, res) => {
+  res.json({ ok: true });
+});
 
 app.get('/api/health', async (_req, res) => {
   try {
@@ -412,11 +429,43 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: err.message || 'Sunucu hatası' });
 });
 
+async function waitForDb() {
+  let delayMs = 1500;
+  const maxDelay = 30000;
+  for (let i = 0; ; i++) {
+    try {
+      await pool.query('SELECT 1');
+      return;
+    } catch (e) {
+      if (e?.code === '28P01') {
+        console.error(
+          '[db] Şifre uyuşmuyor: .env POSTGRES_PASSWORD, Postgres volume (pgdata) ilk kurulurken kullanılan şifre ile aynı olmalı. ' +
+            'Bilinmiyorsa: docker compose down && docker volume rm <proje>_pgdata && .env\'de tek şifre belirleyip docker compose up -d --build'
+        );
+        throw e;
+      }
+      console.warn(`[db] bağlantı bekleniyor (${i + 1}):`, e?.message || e);
+      await new Promise((r) => setTimeout(r, delayMs));
+      delayMs = Math.min(Math.floor(delayMs * 1.2), maxDelay);
+    }
+  }
+}
+
 async function start() {
-  await ensureAuthSchema();
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`API http://0.0.0.0:${PORT}`);
+  await new Promise((resolve) => {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`API http://0.0.0.0:${PORT}`);
+      resolve();
+    });
   });
+  try {
+    await waitForDb();
+    await ensureAuthSchema();
+    dbReady = true;
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
 }
 
 start().catch((e) => {

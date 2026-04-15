@@ -6,8 +6,43 @@
 5) Hâlâ "3000 address already in use" ise (git güncel değilse):
    python3 deploy/fix-app-port-3006.py
 6) docker compose up -d --build
-7) Nginx: proxy_pass http://127.0.0.1:3006 (örnek dosyadaki gibi)
-8) Cloudflare: DNS A kaydı + SSL Full veya Full (strict)
+7) accounting.voyagestars.com — DNS ve Nginx:
+   - Cloudflare (veya DNS sağlayıcı): A kaydı "accounting" → sunucu public IP
+   - Sunucuda Nginx: deploy/nginx-accounting.voyagestars.com.conf.example dosyasını
+     sites-available'a kopyalayın; server_name accounting.voyagestars.com ve
+     proxy_pass http://127.0.0.1:3006 olduğundan emin olun; sites-enabled link + nginx -t + reload
+   - HTTPS: sudo certbot --nginx -d accounting.voyagestars.com  (veya Cloudflare Origin sertifikası)
+8) Cloudflare: SSL "Full" veya "Full (strict)" (Flexible önerilmez)
+
+502 Bad Gateway (nginx arkasına bağlanamıyor):
+  - Süreç ayakta mı: curl -sS http://127.0.0.1:3006/api/live
+  - DB dahil sağlık: curl -sS http://127.0.0.1:3006/api/health
+  - Docker: cd proje && docker compose ps   (app "running" ve "healthy" olmalı)
+  - Nginx proxy_pass portu docker-compose ile aynı olmalı (ör. 3006)
+  - Güncelleme sonrası: docker compose up -d --build
+
+curl: Connection refused (127.0.0.1:3006) — app konteyneri yok veya çökmüş:
+  docker compose ps -a
+  docker compose logs app --tail 50
+  "password authentication failed for user muhasebe" (28P01):
+    .env ile Postgres içindeki gerçek şifre uyuşmuyor (pgdata ilk kurulurken ne yazıldıysa o kalır).
+
+  Veriyi SAKLAYARAK düzeltme (önce bunu deneyin):
+    1) .env içinde kalıcı olacağı şifreyi belirleyin (ör. POSTGRES_PASSWORD=YeniGucluSifre).
+    2) db konteyneri çalışırken, içeriden Unix socket ile bağlanıp kullanıcı şifresini güncelleyin
+       (çoğu kurulumda şifre sormaz; tek tırnak şifre içinde kaçın veya sadece harf-rakam kullanın):
+         docker compose exec db psql -U muhasebe -d muhasebe -c "ALTER USER muhasebe WITH PASSWORD 'YeniGucluSifre';"
+       .env'deki değer ile ALTER USER'daki metin birebir aynı olmalı.
+    3) Uygulamayı yeniden başlatın: docker compose up -d
+    4) curl -sS http://127.0.0.1:3006/api/health
+
+    psql yine "password authentication failed" derse (nadir): konteyner içinde pg_hba / bağlantı
+    yöntemi farklıdır; o zaman sunucu yöneticisi veya Postgres kurtarma (trust ile geçici erişim)
+    gerekir — veriyi silmeden de mümkündür, adımlar daha uzundur.
+
+  Veriyi silerek sıfırdan (VERİ GİDER):
+    docker compose down && docker volume rm PROJE_pgdata
+    sonra .env'de tek POSTGRES_PASSWORD ile: docker compose up -d --build
 
 --- Kod güncellemesini sitede görmek (Docker) ---
 Proje kök klasöründe (docker-compose.yml'in olduğu yer):

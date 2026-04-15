@@ -1,15 +1,28 @@
-# Örnek: /etc/nginx/sites-available/ içine kopyalayıp server_name ve proxy_pass portunu düzenleyin.
-# sudo ln -s ... sites-enabled/ && sudo nginx -t && sudo systemctl reload nginx
+# accounting.voyagestars.com — Nginx → Docker uygulama (127.0.0.1:3006)
 #
-# Docker .env: APP_PORT=3006 → aşağıdaki 3006 ile aynı olmalı.
+# Sunucuda:
+#   sudo cp deploy/nginx-accounting.voyagestars.com.conf.example /etc/nginx/sites-available/accounting.voyagestars.com
+#   sudo ln -sf /etc/nginx/sites-available/accounting.voyagestars.com /etc/nginx/sites-enabled/
+#   sudo nginx -t && sudo systemctl reload nginx
+#
+# HTTPS (önerilir): kurulumdan sonra
+#   sudo certbot --nginx -d accounting.voyagestars.com
+# (Certbot 443 bloğunu ekler veya mevcut server_name ile eşleştirir.)
+#
+# Cloudflare: DNS’te A kaydı "accounting" → sunucu IP; SSL "Full" veya "Full (strict)".
+# Üretim .env: COOKIE_SECURE=true
 
 server {
     listen 80;
+    listen [::]:80;
     server_name accounting.voyagestars.com;
 
     location / {
         proxy_pass http://127.0.0.1:3006;
         proxy_http_version 1.1;
+        proxy_connect_timeout 10s;
+        proxy_send_timeout 120s;
+        proxy_read_timeout 120s;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
